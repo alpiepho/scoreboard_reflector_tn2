@@ -39,3 +39,5 @@ I finally decided to try a very simple server without a real API.
 - https://www.youtube.com/watch?v=AaQzV1LTmo0&t=1s
 - https://www.youtube.com/watch?v=K85PUBjFhn8&t=1s
 - https://getoutline.org/
+- Websockets in 100s
+- https://www.youtube.com/watch?v=1BfCnjr_Vjg
