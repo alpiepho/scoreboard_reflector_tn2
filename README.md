@@ -51,6 +51,7 @@ I finally decided to try a very simple server without a real API.
 - to keep it simple, limit host ability to scale
 - limit amount of data held (flush after 15 minutes?)
 - only handle GET
+- use a non-standard port (via docker)
 - security thru obscurity
 - assume data is not really valueable, **BUT KEEP QUESTIONING THAT ASSUMPTION**
 
@@ -87,6 +88,9 @@ I finally decided to try a very simple server without a real API.
 - https://getoutline.org/
 - Websockets in 100s
 - https://www.youtube.com/watch?v=1BfCnjr_Vjg
+
+- https://deepsource.io/blog/go-web-frameworks/
+- https://github.com/gin-gonic/gin
 
 
 The "scoreboard_" family of projects:
