@@ -72,6 +72,11 @@ I finally decided to try a very simple server without a real API.
 - [ ] ScoresTN2 - integrate with reflector
 - [ ] ScoresTN2 - verify speed etc.
 
+- review use of gin, seems to have pulled in many packages
+
+
+## HOW TO RUN
+
 
 ## EXAMPLE curl COMMANDS
 
