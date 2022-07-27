@@ -1,4 +1,4 @@
-# scores_reflector_tn2
+# scorebaord_reflector_tn2
 Simple Golang web site that caches or reflects score data from ScoresTN2 application
 
 ## BACKGROUND
@@ -74,11 +74,34 @@ I finally decided to try a very simple server without a real API.
 
 - review use of gin, seems to have pulled in many packages
 
+## HOW TO RUN LOCAL index.html (if needed)
 
-## HOW TO RUN
+- live server
+    - npm install -g live-server
+    - live-server
+- python
+    - TBD
+- golang
+    - TBD
+
+
+
+## HOW TO RUN SERVER LOCALLY
+
+- go run main.go
+
+
+## HOW TO RUN (SERVER) WITH DOCKER LOCALLY
+
+- docker build -t scorebaord_reflector_tn2 .
+- docker run -it -p 3000:3000 scorebaord_reflector_tn2
 
 
 ## EXAMPLE curl COMMANDS
+
+- curl localhost:3000/hello  - send "hello" 
+- curl localhost:3000/reset  - reset system    
+- curl localhost:3000/       - return list of counts from hello requests    
 
 ## REFERENCES
 
