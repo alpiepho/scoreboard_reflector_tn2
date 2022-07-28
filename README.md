@@ -102,6 +102,10 @@ I finally decided to try a very simple server without a real API.
 - curl localhost:3000/hello  - send "hello" 
 - curl localhost:3000/reset  - reset system    
 - curl localhost:3000/       - return list of counts from hello requests    
+- curl localhost:3000/add?data=test
+- curl "localhost:3000/add?data=test data"  fails
+- curl "localhost:3000/add?data=test%20data"  passes
+- curl "localhost:3000/add?data=test,data"  passes
 
 ## REFERENCES
 
