@@ -60,25 +60,32 @@ I finally decided to try a very simple server without a real API.
 - [x] readme with rough design goals
 - [x] Use GET with params as *input*, not real api
 - [x] Clears data at certain size
-- [x] Clears data after certain idle time
-- [ ] Web endpoints:
-- [x]     - "/" get raw text dump of all data
-- [ ]     - "/scorer" get raw text data for "scorer"
-- [ ]     - "/scorer/count" get count of packets for scorer, returns json
-- [ ]     - "/scorer/n" get nth packet, returns json
+- [x] Clears all data after certain idle time
+- [ ] Clears data after certain idle time, by keeper
+- Web endpoints:
 - [x]     - "/add?s=scorer&d={comma separated data}" how to add data with GET
-- [x]     - "/reset" reset application
-- [ ] data added with scorer id
+- [x]     - "/reset" reset all data
+- [ ]     - "/reset/(keeper)" reset data by keeper
+- [ ]     - "/" get html text dump of all data
+- [x]     - "/raw" get raw text dump of all data
+- [x]     - "/json" get json dump of all data
+- [x]     - "/count" count of data, raw
+- [x]     - "/(index)" get json dump of data by global index, json
+- [ ]     - "/(keeper)"
+- [ ]     - "/(keeper)/raw"
+- [ ]     - "/(keeper)/json"
+- [ ]     - "/(keeper)/count"
+- [ ]     - "/(keeper)/(index)"
+- [x] data added with scorer id
 - [x] timestamp added to data packet as received
 - [x] start docker file
 - [ ] try hosting
-- [ ] flush out json operations
+- [x] flush out json operations
 - [ ] start ScoresTapTN2
 - [ ] ScoresTN2 - add settings for scorer, reflector
 - [ ] ScoresTN2 - integrate with reflector
 - [ ] ScoresTN2 - verify speed etc.
-
-- review use of gin, seems to have pulled in many packages
+- [ ] review use of gin?, seems to have pulled in many packages
 
 ## HOW TO RUN LOCAL index.html (if needed)
 
