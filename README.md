@@ -58,13 +58,19 @@ I finally decided to try a very simple server without a real API.
 
 ## TODO
 - [x] readme with rough design goals
-- [ ] start go server implementation
-- [ ] create table
-- [ ] timer to clear table
-- [ ] "/"
-- [ ] "/reset"
-- [ ] "add" endpoint
-- [ ] start docker file
+- [x] Use GET with params as *input*, not real api
+- [x] Clears data at certain size
+- [x] Clears data after certain idle time
+- [ ] Web endpoints:
+- [x]     - "/" get raw text dump of all data
+- [ ]     - "/scorer" get raw text data for "scorer"
+- [ ]     - "/scorer/count" get count of packets for scorer, returns json
+- [ ]     - "/scorer/n" get nth packet, returns json
+- [x]     - "/add?s=scorer&d={comma separated data}" how to add data with GET
+- [x]     - "/reset" reset application
+- [ ] data added with scorer id
+- [x] timestamp added to data packet as received
+- [x] start docker file
 - [ ] try hosting
 - [ ] flush out json operations
 - [ ] start ScoresTapTN2
@@ -123,7 +129,7 @@ I finally decided to try a very simple server without a real API.
 
 - https://deepsource.io/blog/go-web-frameworks/
 - https://github.com/gin-gonic/gin
-
+- https://github.com/go-co-op/gocron
 
 The "scoreboard_" family of projects:
 - https://github.com/alpiepho/scoreboard_tn2

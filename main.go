@@ -6,32 +6,29 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 )
 
-// [ ] - Simple site that tracks the most recent scores
-// [x] - Use GET with params as *input*, not real api
-// [x] - Clears data at certain size
-// [ ] - Clears data after certain idle time
-// [ ] - Web endpoints:
-// [x]     - "/" get raw text dump of all data
-// [ ]     - "/scorer" get raw text data for "scorer"
-// [ ]     - "/scorer/count" get count of packets for scorer, returns json
-// [ ]     - "/scorer/n" get nth packet, returns json
-// [x]     - "/add?s=scorer&d={comma separated data}" how to add data with GET
-// [x]     - "/reset" reset application
-// [ ] - data added with scorer id
-// [ ] - timestamp added to data packet as received
-
 func main() {
-	MAXLIST := 1000
-	list := []string{}
-	clearTime := time.Minute * 3
+	MAXLIST := 1000    // max size of list
+	MAXMINUTES := 60   // max minutes to keep data
+	list := []string{} // list
+	lastAdd := 0       // count down from last add
 
-	var timer = time.AfterFunc(clearTime, func() {
-		// reset list after 30 minutes
-		list = []string{}
-		fmt.Printf("reset list")
+	s := gocron.NewScheduler(time.UTC)
+	// check every minute
+	s.Cron("*/1 * * * *").Do(func() {
+		//fmt.Printf("*/1 * * * *\n")
+		// TODO: reset by keeper, name-pair
+		if lastAdd == 0 {
+			fmt.Printf("timed reset\n")
+			list = []string{}
+		}
+		if lastAdd > 0 {
+			lastAdd--
+		}
 	})
+	s.StartAsync()
 
 	r := gin.Default()
 
@@ -45,21 +42,21 @@ func main() {
 	// add data to list
 	r.GET("/add", func(c *gin.Context) {
 		data := c.DefaultQuery("data", "")
+		// limit size of list
 		if len(list) >= MAXLIST {
-			list = []string{}
+			list = list[1:]
 		}
 		// assume data=<keeper>,backcolor1,backcolor2,color1,color2,name1,name2,sets1,sets2,score1,score2,posession
 		// ie. shannon,#000000,#ffffff,#ffffff,#000000,Them,Us,0,0,10,8,0
 		// may have spaces declared as %20, looks like gin converts them to ' '
 
 		// TODO: prefix time stamp
-		list = append(list, data)
+		currentTime := time.Now()
+		entry := currentTime.Format("2006-01-02_15:04:05") + ", " + data
+		list = append(list, entry)
 		c.String(200, "")
 
-		if timer.Stop() {
-			<-timer.C
-		}
-		timer.Reset(clearTime)
+		lastAdd = MAXMINUTES
 	})
 
 	// DEBUG
