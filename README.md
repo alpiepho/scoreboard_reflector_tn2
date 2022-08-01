@@ -61,21 +61,21 @@ I finally decided to try a very simple server without a real API.
 - [x] Use GET with params as *input*, not real api
 - [x] Clears data at certain size
 - [x] Clears all data after certain idle time
-- [ ] Clears data after certain idle time, by keeper
+- [x] Clears data after certain idle time, by keeper
 - Web endpoints:
 - [x]     - "/add?s=scorer&d={comma separated data}" how to add data with GET
 - [x]     - "/reset" reset all data
-- [ ]     - "/reset/(keeper)" reset data by keeper
-- [ ]     - "/" get html text dump of all data
+- [x]     - "/reset/(keeper)" reset data by keeper
+- [x]     - "/" get html text dump of all data
 - [x]     - "/raw" get raw text dump of all data
 - [x]     - "/json" get json dump of all data
 - [x]     - "/count" count of data, raw
 - [x]     - "/(index)" get json dump of data by global index, json
-- [ ]     - "/(keeper)"
-- [ ]     - "/(keeper)/raw"
-- [ ]     - "/(keeper)/json"
-- [ ]     - "/(keeper)/count"
-- [ ]     - "/(keeper)/(index)"
+- [x]     - "/(keeper)"
+- [x]     - "/(keeper)/raw"
+- [x]     - "/(keeper)/json"
+- [x]     - "/(keeper)/count"
+- [x]     - "/(keeper)/(index)"
 - [x] data added with scorer id
 - [x] timestamp added to data packet as received
 - [x] start docker file
