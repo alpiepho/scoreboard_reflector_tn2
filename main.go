@@ -302,7 +302,7 @@ const HTML_START string = `
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon"
       type="image/png" 
-      href="./favicon.ico" />
+      href="/favicon.ico" />
   </head>
   <body class="body">
     <main>

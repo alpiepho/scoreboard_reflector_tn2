@@ -79,12 +79,13 @@ I finally decided to try a very simple server without a real API.
 - [x] data added with scorer id
 - [x] timestamp added to data packet as received
 - [x] start docker file
-- [ ] try hosting
 - [x] flush out json operations
-- [ ] start ScoresTapTN2
 - [ ] ScoresTN2 - add settings for scorer, reflector
 - [ ] ScoresTN2 - integrate with reflector
 - [ ] ScoresTN2 - verify speed etc.
+- [ ] try hosting
+- [ ] start ScoresTapTN2
+
 - [ ] review use of gin?, seems to have pulled in many packages
 
 ## HOW TO RUN LOCAL index.html (if needed)
