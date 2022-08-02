@@ -45,7 +45,7 @@ func main() {
 			fmt.Printf("timed reset all\n")
 			list = []string{}
 			keepers = []Keeper{}
-			lastAdd = -1
+			//lastAdd = -1
 		}
 		if lastAdd > 0 {
 			lastAdd--
@@ -75,6 +75,7 @@ func main() {
 	// reset list
 	r.GET("/reset", func(c *gin.Context) {
 		list = []string{}
+		keepers = []Keeper{}
 		c.String(200, "")
 	})
 
@@ -388,8 +389,7 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 
 			result += parts[10] + ", "
 			result += parts[11] + ", "
-		}
-		if len(parts) == 9 {
+		} else if len(parts) == 9 {
 			// ie. timestamp,shannon,Them,Us,0,0,10, 8,0
 			//     0         1       2    3  4 5 6   7 8
 			result += parts[0] + ", "
@@ -404,7 +404,8 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 
 			result += parts[6] + ", "
 			result += parts[7] + ", "
-			fmt.Printf("long form\n")
+		} else {
+			result += list[i]
 		}
 		result += "        </li>\n"
 	}
