@@ -80,9 +80,9 @@ I finally decided to try a very simple server without a real API.
 - [x] timestamp added to data packet as received
 - [x] start docker file
 - [x] flush out json operations
-- [ ] ScoresTN2 - add settings for scorer, reflector
-- [ ] ScoresTN2 - integrate with reflector
-- [ ] ScoresTN2 - verify speed etc.
+- [x] ScoresTN2 - add settings for scorer, reflector
+- [x] ScoresTN2 - integrate with reflector
+- [x] ScoresTN2 - verify speed etc.
 - [ ] try hosting
 - [ ] start ScoresTapTN2
 
