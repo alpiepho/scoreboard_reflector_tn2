@@ -86,7 +86,8 @@ func main() {
 		data := c.DefaultQuery("data", "")
 		// limit size of list
 		if len(list) >= MAXLIST {
-			list = list[1:]
+			// list = list[1:] // remove first
+			list = list[:len(list)-1] // remove last
 		}
 		// assume data=<keeper>,backcolor1,backcolor2,color1,color2,name1,name2,sets1,sets2,score1,score2,posession
 		// *color*: 6 char hex, rgb
@@ -120,7 +121,8 @@ func main() {
 		// prefix time stamp
 		currentTime := time.Now()
 		entry := currentTime.Format("2006-01-02_15:04:05") + "," + data
-		list = append(list, entry)
+		//list = append(list, entry)              // add last
+		list = append([]string{entry}, list...) // add first
 		c.String(200, "")
 
 	})
@@ -388,7 +390,7 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 			result += parts[7] + ", "
 
 			result += parts[10] + ", "
-			result += parts[11] + ", "
+			result += parts[11] //+ ", "
 		} else if len(parts) == 9 {
 			// ie. timestamp,shannon,Them,Us,0,0,10, 8,0
 			//     0         1       2    3  4 5 6   7 8
@@ -403,7 +405,7 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 			result += parts[3] + ", "
 
 			result += parts[6] + ", "
-			result += parts[7] + ", "
+			result += parts[7] //+ ", "
 		} else {
 			result += list[i]
 		}
