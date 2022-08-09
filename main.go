@@ -59,14 +59,11 @@ func main() {
 	r.StaticFile("/favicon.ico", "./resources/favicon.ico")
 	r.StaticFile("/style.css", "./resources/style.css")
 
-	// DEBUG
-	r.GET("/hello", func(c *gin.Context) {
-		c.String(200, "Hello, World!")
-	})
-
 	// API
 	// route: /version
 	r.GET("/version", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, VERSION)
 	})
 
@@ -76,6 +73,8 @@ func main() {
 	r.GET("/reset", func(c *gin.Context) {
 		list = []string{}
 		keepers = []Keeper{}
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, "")
 	})
 
@@ -123,6 +122,8 @@ func main() {
 		entry := currentTime.Format("2006-01-02_15:04:05") + "," + data
 		//list = append(list, entry)              // add last
 		list = append([]string{entry}, list...) // add first
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, "")
 
 	})
@@ -132,6 +133,8 @@ func main() {
 	// dump all list in raw form
 	r.GET("/raw", func(c *gin.Context) {
 		msg := strings.Join(list, "\n")
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, msg)
 	})
 
@@ -139,6 +142,8 @@ func main() {
 	// route: /json
 	// dump all list in raw form
 	r.GET("/json", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.JSON(200, gin.H{"all": list})
 	})
 
@@ -147,6 +152,8 @@ func main() {
 	// html with list of keepers links
 	r.GET("/html", func(c *gin.Context) {
 		msg := buildKeepersHtml(keepers)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
@@ -155,6 +162,8 @@ func main() {
 	// html with list of keepers links
 	r.GET("/", func(c *gin.Context) {
 		msg := buildKeepersHtml(keepers)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
@@ -165,6 +174,8 @@ func main() {
 		keeperid := c.Param("keeperid")
 		keeperList := getKeepersList(keeperid, list)
 		msg := strings.Join(keeperList, "\n")
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, msg)
 	})
 
@@ -174,6 +185,8 @@ func main() {
 	r.GET("/:keeperid/json", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
 		keeperList := getKeepersList(keeperid, list)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.JSON(200, gin.H{keeperid: keeperList})
 	})
 
@@ -184,6 +197,8 @@ func main() {
 		keeperid := c.Param("keeperid")
 		keeperList := getKeepersList(keeperid, list)
 		msg := buildKeeperScoresHtml(keeperid, keeperList)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
@@ -193,6 +208,8 @@ func main() {
 	r.GET("/:keeperid/reset", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
 		list = removeKeepersList(keeperid, list)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, "")
 	})
 
@@ -203,6 +220,8 @@ func main() {
 		keeperid := c.Param("keeperid")
 		keeperList := getKeepersList(keeperid, list)
 		msg := buildKeeperScoresHtml(keeperid, keeperList)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
@@ -212,6 +231,8 @@ func main() {
 	r.GET("/:keeperid/count", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
 		count := getKeepersCount(keeperid, list)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, string(rune(count)))
 	})
 
@@ -224,9 +245,13 @@ func main() {
 		index, _ := strconv.Atoi(indexid)
 		keeperList := getKeepersList(keeperid, list)
 		if index >= 0 && index < len(keeperList) {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET")
 			c.JSON(200, gin.H{"entry": keeperList[index]})
 
 		} else {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET")
 			c.String(200, "")
 		}
 	})

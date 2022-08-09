@@ -144,3 +144,6 @@ The "scoreboard_" family of projects:
 - https://github.com/alpiepho/scoreboard_reflector_tn2
 - https://github.com/alpiepho/scoreboard_tap_tn2
 
+- https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
+
+

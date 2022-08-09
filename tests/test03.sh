@@ -23,6 +23,7 @@ curl "localhost:3000/add?data=shannon,000000,ffffff,ffffff,000000,Them,Us,0,0,2,
 curl "localhost:3000/add?data=jim,000000,ffffff,ffffff,000000,Them,Us,0,0,1,0,1"
 #sleep 2
 curl "localhost:3000/add?data=jim,000000,ffffff,ffffff,000000,Them,Us,0,0,2,0,1"
+curl "localhost:3000/add?data=shannon,GOROCKY"
 
 
 echo "\nfrom /"
