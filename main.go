@@ -256,7 +256,7 @@ func main() {
 		}
 	})
 
-	r.Run(":3000")
+	r.Run(":80")
 }
 
 func getKeepersIndex(keeper string, keepers []Keeper) int {
