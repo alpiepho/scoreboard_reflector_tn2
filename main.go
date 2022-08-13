@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -256,7 +257,13 @@ func main() {
 		}
 	})
 
-	r.Run(":80")
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "80"
+	}
+	port = ":" + port
+
+	r.Run(port)
 }
 
 func getKeepersIndex(keeper string, keepers []Keeper) int {
