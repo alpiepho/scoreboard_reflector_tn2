@@ -121,6 +121,24 @@ I finally decided to try a very simple server without a real API.
 - curl "localhost:3000/add?data=test%20data"  passes
 - curl "localhost:3000/add?data=test,data"  passes
 
+## APP ENGINE NOTES
+
+- gcloud auth list
+- git clone https://github.com/alpiepho/scoreboard_reflector_tn2.git reflectortn2
+- cd reflectortn2
+- sudo apt-get install google-cloud-sdk-app-engine-go
+- go build main.go
+- go get github.com/gin-gonic/gin
+- go get github.com/go-co-op/gocron
+- gcloud app deploy
+- gcloud app browse
+
+
+Welcome to Cloud Shell! Type "help" to get started.
+Your Cloud Platform project in this session is set to refelectortn2.
+Use “gcloud config set project [PROJECT_ID]” to change to a different project.
+alpiepho@cloudshell:~ (refelectortn2)$ history
+
 ## REFERENCES
 
 - https://tutorialedge.net/golang/go-websocket-tutorial/
@@ -147,3 +165,43 @@ The "scoreboard_" family of projects:
 - https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
 
 
+## RAW COMMANDS FROM GOOGLE CLOUDE
+
+    1  gcloud auth list
+    2  gcloud config list project
+    3  gcloud config set project
+    4  gcloud config set project ReflectorTN2
+    5  gcloud config set project refelectortn2
+    6  git clone https://github.com/alpiepho/scoreboard_reflector_tn2.git
+    7  ls
+    8  cd scoreboard_reflector_tn2/
+    9  cd ..
+   10  cd -
+   11  ls
+   12  sudo apt-get install google-cloud-sdk-app-engine-go
+   13  gcloud app deploy
+   14  ls
+   15  git pull
+   16  gcloud app deploy
+   17  gcloud app browse
+   18  gcloud app deploy
+   19  ls
+   20  cd scoreboard_reflector_tn2/
+   21  go build main.go
+   22  gcloud app deploy
+   23  go --version
+   24  go -version
+   25  go -v
+   26  go help
+   27  vi go.mod
+   28  go build main.go
+   29  go get github.com/gin-goinc/gin
+   30  go get github.com/gin-gonic/gin
+   31  go build main.go
+   32  go get github.com/go-co-op/gocron
+   33  go build main.go
+   34  git status
+   35  git diff go.mod
+   36  gcloud app deploy
+   37  gcloud app browse
+   38  history
