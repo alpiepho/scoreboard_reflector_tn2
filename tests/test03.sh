@@ -1,6 +1,6 @@
 # simple add, read
-curl localhost:3000/reset
-curl localhost:3000/
+curl localhost:80/reset
+curl localhost:80/
 
 # assume data=<keeper>,backcolor1,backcolor2,color1,color2,name1,name2,sets1,sets2,score1,score2,posession
 # *color*: 6 char hex, rgb
@@ -27,14 +27,14 @@ curl "localhost:3000/add?data=shannon,GOROCKY"
 
 
 echo "\nfrom /"
-curl localhost:3000/
+curl localhost:80/
 echo "\nfrom /raw"
-curl localhost:3000/raw
+curl localhost:80/raw
 echo "\nfrom /json"
-curl localhost:3000/json
+curl localhost:80/json
 echo ""
 echo "\nfrom /shannon/raw"
-curl localhost:3000/shannon/raw
+curl localhost:80/shannon/raw
 echo "\nfrom /shannon/json"
-curl localhost:3000/shannon/json
+curl localhost:80/shannon/json
 echo ""
