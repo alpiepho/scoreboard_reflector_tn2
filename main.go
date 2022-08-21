@@ -143,9 +143,27 @@ func main() {
 	// route: /json
 	// dump all list in raw form
 	r.GET("/json", func(c *gin.Context) {
+		offset := 0
+		count := len(list)
+
+		paramPairs := c.Request.URL.Query()
+		for key, values := range paramPairs {
+			if key == "offset" {
+				offset, _ = strconv.Atoi(values[0])
+			}
+			if key == "count" {
+				given, _ := strconv.Atoi(values[0])
+				count = given + offset
+				if given == 0 || count > len(list) {
+					count = len(list)
+				}
+			}
+		}
+		partialList := list[offset:count]
+
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
-		c.JSON(200, gin.H{"all": list})
+		c.JSON(200, gin.H{"all": partialList})
 	})
 
 	// DIRECT USER
@@ -168,6 +186,20 @@ func main() {
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
+	// API
+	// route: /keepers/json
+	// dump keeper names in json form
+	r.GET("/keepers/json", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		fmt.Println(keepers)
+		names := []string{}
+		for i := 0; i < len(keepers); i++ {
+			names = append(names, keepers[i].name)
+		}
+		c.JSON(200, gin.H{"keepers": names})
+	})
+
 	// DEBUG
 	// route: /(keeper)/raw
 	// all raw results for keeper
@@ -186,9 +218,27 @@ func main() {
 	r.GET("/:keeperid/json", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
 		keeperList := getKeepersList(keeperid, list)
+
+		offset := 0
+		count := len(keeperList)
+
+		paramPairs := c.Request.URL.Query()
+		for key, values := range paramPairs {
+			if key == "offset" {
+				offset, _ = strconv.Atoi(values[0])
+			}
+			if key == "count" {
+				given, _ := strconv.Atoi(values[0])
+				count = given + offset
+				if given == 0 || count > len(keeperList) {
+					count = len(keeperList)
+				}
+			}
+		}
+		partialList := keeperList[offset:count]
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
-		c.JSON(200, gin.H{keeperid: keeperList})
+		c.JSON(200, gin.H{keeperid: partialList})
 	})
 
 	// DIRECT USER
