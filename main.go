@@ -145,6 +145,7 @@ func main() {
 	r.GET("/json", func(c *gin.Context) {
 		offset := 0
 		count := len(list)
+		matchNames := []string{"*"}
 
 		paramPairs := c.Request.URL.Query()
 		for key, values := range paramPairs {
@@ -158,8 +159,20 @@ func main() {
 					count = len(list)
 				}
 			}
+			if key == "names" {
+				matchNames = []string{}
+				parts := strings.Split(values[0], ",")
+				for i := 0; i < len(parts); i++ {
+					matchNames = append(matchNames, parts[i])
+				}
+			}
 		}
-		partialList := list[offset:count]
+
+		matchList := getKeepersListMany(matchNames, list)
+		if count > len(matchList) {
+			count = len(matchList)
+		}
+		partialList := matchList[offset:count]
 
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
@@ -345,6 +358,22 @@ func getKeepersList(keeper string, list []string) []string {
 		parts := strings.Split(list[i], ",")
 		if keeper == parts[1] {
 			result = append(result, list[i])
+		}
+	}
+	return result
+}
+
+func getKeepersListMany(keeperNames []string, list []string) []string {
+	result := []string{}
+	for i := 0; i < len(list); i++ {
+		// ie. timestamp,keeper,...
+		parts := strings.Split(list[i], ",")
+
+		for j := 0; j < len(keeperNames); j++ {
+			keeper := keeperNames[j]
+			if keeper == parts[1] || keeper == "*" {
+				result = append(result, list[i])
+			}
 		}
 	}
 	return result

@@ -63,8 +63,6 @@ curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,
 curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,0,24,18,1"
 curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,0,25,18,1"
 curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,1,25,18,1"
-curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,1,25,18,1"
-curl "localhost:3000/add?data=keeper1,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,1,25,18,1"
 curl "localhost:3000/add?data=keeper2,ff000000,fff44336,ff000000,ff448aff,Away1,Home1,0,1,0,0,2"
 curl "localhost:3000/add?data=keeper2,ff000000,ff36f43a,ff000000,ffffab44,Away1,Home1,0,1,0,0,2"
 curl "localhost:3000/add?data=keeper2,ff000000,ff36f43a,ff000000,ffffab44,Away1,Home1,0,1,1,0,1"
@@ -113,3 +111,13 @@ curl "localhost:3000/add?data=keeper3,ff000000,fff44336,fff7f2f2,ff448aff,Away,H
 curl "localhost:3000/add?data=keeper3,ff000000,fff44336,fff7f2f2,ff448aff,Away,Home,0,2,0,11,2"
 curl "localhost:3000/add?data=keeper3,ff000000,fff44336,fff7f2f2,ff448aff,Away,Home,0,3,0,11,2"
 curl "localhost:3000/add?data=keeper3,ff000000,fff44336,fff7f2f2,ff448aff,Away3,Home3,0,3,0,11,2"
+
+
+curl "http://localhost:3000/keeper1/json?offset=1&count=2"
+echo
+
+curl "http://localhost:3000/json?offset=1&count=2"
+echo
+
+curl "http://localhost:3000/json?names=keeper1,keeper3"
+echo
