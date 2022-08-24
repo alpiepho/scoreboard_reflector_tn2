@@ -121,6 +121,9 @@ I finally decided to try a very simple server without a real API.
 - curl "localhost:3000/add?data=test%20data"  passes
 - curl "localhost:3000/add?data=test,data"  passes
 
+reverse lines
+sed '1!G;h;$!d' /tmp/test
+
 ## APP ENGINE NOTES
 
 - gcloud auth list
