@@ -17,7 +17,7 @@ type Keeper struct {
 }
 
 func main() {
-	VERSION := "0.1"
+	VERSION := "2.2"
 	MAXLIST := 1000      // max size of list
 	MAXMINUTES := 60     // max minutes to keep data, per keeper
 	MAXMINUTESALL := 120 // max minutes to keep data, any keeper
@@ -427,6 +427,9 @@ const HTML_INTRO_KEEPERS string = `
       <h1  id="top">ScoresTN2 Reflector - Current Score Keepers</h1>
 
       <div class="introduction">
+      <p>
+      Version 2.2
+      </p>
       <p>
       This is a list of the current score keepers.
       </p>

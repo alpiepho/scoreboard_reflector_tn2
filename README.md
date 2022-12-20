@@ -1,23 +1,44 @@
 # scorebaord_reflector_tn2
 Simple Golang web site that caches or reflects score data from ScoresTN2 application
 
-## BACKGROUND
 
-The ScoresTN2 is a PWA for scoring youth sports, like volleyball.  Typically, one person keeps score on a smart phone, flashing the on going score to a video recording, or to other spectators.
+## SYSTEM OVERVIEW
 
-Two problems occur:
-1. The score keeper may not always show the score
+This application is part of a system that expands the typical scoring keeping phone application.
+
+With other scoring applications, two problems occur:
+1. The score keeper may not always show the score to video or people
 2. The display on the phone may not be large enough
 
-As I was thinking about how to improve the ScoresTN2 application, I wanted to find a way to solve the problem of people shouting "Hey, what is the score...I still can't read it".
+To solve this, there are actually 3 applications in this system:
 
-Several ideas of larger screens with BT and ardino, or even LED glasses and arduino rolled thru my head, or a service that texted scores etc.  All of these seem overkiil.  I finally settled on a hosted server.
+![Overview](./overview.png)
 
-But I wanted to keep it really simple.  I don't want the hastle or possible cost of a hacked or run away service.  I can tolerate someyhing small per month.  I have been using simple VPN that one of the Google/Alphabet companies created, "Outline VPN".  This shows you how to easily set up your own VPN and hosts on Digital Ocean for $5/month.  That is my goal for hosting this reflector.
+- ScoresTN2 - application used by score keeper
+- TapTN2 - application used by parents and fans
+- <u><b>ReflectorTN2</b></u> - backend server to share the scores
 
-I debated about a real web server with authentication or a websever with websockets.  First thought about using Dart (as shown in the Boaring show videos) or Golang with Websockets (a cominations used at my day job).  Several links are show in the REFERENCES section below.  One key take away is that I could create a server in any language and wrap it with a Docker container that should be easy to host.
+The [ScoresTN2](https://github.com/alpiepho/scoreboard_tn2) application is similar to other
+applications you can install from the Apple App Store or Google Play...but you don't need to use
+either to get it!  It is a newer form of web application, a PWA, that can be opened from
+a website and 'saved' to your IPhone or Android home screen.
 
-I finally decided to try a very simple server without a real API.
+The [TapTN2](https://github.com/alpiepho/scoreboard_tap_tn2) application is similar in style to
+ScoresTN2, but only "taps' into the ReflectorTN2 site to show the scores that were recently
+sent by ScoresTN2.  Again, you install it by going to the site and use options described below
+to save it to your home screen.
+
+The [ReflectorTN2](https://github.com/alpiepho/scoreboard_reflector_tn2) application is the backend
+server that shares the data between the first two applicaitons.  There is no user application, but
+both ScoresTN2 and TapTN2 need to be configured to use the same link to ReflectorTN2.
+
+ScoresTN2 and TapTN2 are PWAs, Progressive Web Applications, written in Flutter. ReflectorTN2 is
+a Golang application hosted on Google Cloud.  It recieves scores from ScoresTN2 and allows TapTN2 to
+get them.  NOTE: the data on ReflectorTN2 is automatically deleted 1 hour after if now new scores
+are recieved from ScoresTN2 for each score keeper.
+
+FOOTNOTE: if you are wondering about "TN", it stands for "That Name"...the first words the authors
+father-in-law said when his daughter told him we were getting married.  "You are going to have 'that name'?"
 
 
 ## REALLY SIMPLE DESIGN
@@ -56,7 +77,7 @@ I finally decided to try a very simple server without a real API.
 - assume data is not really valueable, **BUT KEEP QUESTIONING THAT ASSUMPTION**
 
 
-## TODO
+## TODO AND FUTURE CHANGES
 - [x] readme with rough design goals
 - [x] Use GET with params as *input*, not real api
 - [x] Clears data at certain size
@@ -99,7 +120,6 @@ I finally decided to try a very simple server without a real API.
     - TBD
 
 
-
 ## HOW TO RUN SERVER LOCALLY
 
 - go run main.go
@@ -110,8 +130,25 @@ I finally decided to try a very simple server without a real API.
 - docker build -t scorebaord_reflector_tn2 .
 - docker run -it -p 3000:3000 scorebaord_reflector_tn2
 
+## APPENDIX: original BACKGROUND
 
-## EXAMPLE curl COMMANDS
+The ScoresTN2 is a PWA for scoring youth sports, like volleyball.  Typically, one person keeps score on a smart phone, flashing the on going score to a video recording, or to other spectators.
+
+Two problems occur:
+1. The score keeper may not always show the score
+2. The display on the phone may not be large enough
+
+As I was thinking about how to improve the ScoresTN2 application, I wanted to find a way to solve the problem of people shouting "Hey, what is the score...I still can't read it".
+
+Several ideas of larger screens with BT and ardino, or even LED glasses and arduino rolled thru my head, or a service that texted scores etc.  All of these seem overkiil.  I finally settled on a hosted server.
+
+But I wanted to keep it really simple.  I don't want the hastle or possible cost of a hacked or run away service.  I can tolerate someyhing small per month.  I have been using simple VPN that one of the Google/Alphabet companies created, "Outline VPN".  This shows you how to easily set up your own VPN and hosts on Digital Ocean for $5/month.  That is my goal for hosting this reflector.
+
+I debated about a real web server with authentication or a websever with websockets.  First thought about using Dart (as shown in the Boaring show videos) or Golang with Websockets (a cominations used at my day job).  Several links are show in the REFERENCES section below.  One key take away is that I could create a server in any language and wrap it with a Docker container that should be easy to host.
+
+I finally decided to try a very simple server without a real API.
+
+## APPENDIX: EXAMPLE curl COMMANDS
 
 - curl localhost:3000/hello  - send "hello" 
 - curl localhost:3000/reset  - reset system    
@@ -124,7 +161,7 @@ I finally decided to try a very simple server without a real API.
 reverse lines
 sed '1!G;h;$!d' /tmp/test
 
-## APP ENGINE NOTES
+## APPENDIX: APP ENGINE NOTES
 
 - gcloud auth list
 - git clone https://github.com/alpiepho/scoreboard_reflector_tn2.git reflectortn2
@@ -142,33 +179,8 @@ Your Cloud Platform project in this session is set to refelectortn2.
 Use “gcloud config set project [PROJECT_ID]” to change to a different project.
 alpiepho@cloudshell:~ (refelectortn2)$ history
 
-## REFERENCES
 
-- https://tutorialedge.net/golang/go-websocket-tutorial/
-- https://gowebexamples.com/websockets/
-- https://yalantis.com/blog/how-to-build-websockets-in-go/
-- https://dev.to/heroku/deploying-your-first-golang-webapp-11b3
-- https://medium.com/google-cloud/building-a-go-web-app-from-scratch-to-deploying-on-google-cloud-part-1-building-a-simple-go-aee452a2e654
-- Google Flutter Boaring Show parts 1 and 2:
-- https://www.youtube.com/watch?v=AaQzV1LTmo0&t=1s
-- https://www.youtube.com/watch?v=K85PUBjFhn8&t=1s
-- https://getoutline.org/
-- Websockets in 100s
-- https://www.youtube.com/watch?v=1BfCnjr_Vjg
-
-- https://deepsource.io/blog/go-web-frameworks/
-- https://github.com/gin-gonic/gin
-- https://github.com/go-co-op/gocron
-
-The "scoreboard_" family of projects:
-- https://github.com/alpiepho/scoreboard_tn2
-- https://github.com/alpiepho/scoreboard_reflector_tn2
-- https://github.com/alpiepho/scoreboard_tap_tn2
-
-- https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
-
-
-## RAW COMMANDS FROM GOOGLE CLOUDE
+## APPENDIX: RAW COMMANDS FROM GOOGLE CLOUD
 
     1  gcloud auth list
     2  gcloud config list project
@@ -208,3 +220,30 @@ The "scoreboard_" family of projects:
    36  gcloud app deploy
    37  gcloud app browse
    38  history
+
+
+## REFERENCES
+
+- https://tutorialedge.net/golang/go-websocket-tutorial/
+- https://gowebexamples.com/websockets/
+- https://yalantis.com/blog/how-to-build-websockets-in-go/
+- https://dev.to/heroku/deploying-your-first-golang-webapp-11b3
+- https://medium.com/google-cloud/building-a-go-web-app-from-scratch-to-deploying-on-google-cloud-part-1-building-a-simple-go-aee452a2e654
+- Google Flutter Boaring Show parts 1 and 2:
+- https://www.youtube.com/watch?v=AaQzV1LTmo0&t=1s
+- https://www.youtube.com/watch?v=K85PUBjFhn8&t=1s
+- https://getoutline.org/
+- Websockets in 100s
+- https://www.youtube.com/watch?v=1BfCnjr_Vjg
+
+- https://deepsource.io/blog/go-web-frameworks/
+- https://github.com/gin-gonic/gin
+- https://github.com/go-co-op/gocron
+
+The "scoreboard_" family of projects:
+- https://github.com/alpiepho/scoreboard_tn2
+- https://github.com/alpiepho/scoreboard_reflector_tn2
+- https://github.com/alpiepho/scoreboard_tap_tn2
+
+- https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
+
