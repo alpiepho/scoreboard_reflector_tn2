@@ -104,8 +104,8 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [x] ScoresTN2 - add settings for scorer, reflector
 - [x] ScoresTN2 - integrate with reflector
 - [x] ScoresTN2 - verify speed etc.
-- [ ] try hosting
-- [ ] start ScoresTapTN2
+- [x] try hosting
+- [x] start ScoresTapTN2
 
 - [ ] review use of gin?, seems to have pulled in many packages
 
@@ -182,6 +182,12 @@ alpiepho@cloudshell:~ (refelectortn2)$ history
 
 ## APPENDIX: RAW COMMANDS FROM GOOGLE CLOUD
 
+- search Google Cloud
+- login
+- dash board for ReflectorTN2
+- open console
+
+<pre>
     1  gcloud auth list
     2  gcloud config list project
     3  gcloud config set project
@@ -220,6 +226,7 @@ alpiepho@cloudshell:~ (refelectortn2)$ history
    36  gcloud app deploy
    37  gcloud app browse
    38  history
+</pre>
 
 
 ## REFERENCES

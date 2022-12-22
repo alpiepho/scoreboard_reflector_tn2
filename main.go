@@ -16,12 +16,219 @@ type Keeper struct {
 	lastAdd int
 }
 
+func getKeepersIndex(keeper string, keepers []Keeper) int {
+	index := -1
+	for i := 0; i < len(keepers); i++ {
+		if keeper == keepers[i].name {
+			index = i
+		}
+	}
+	return index
+}
+
+func getKeepersCount(keeper string, list []string) int {
+	result := 0
+	for i := 0; i < len(list); i++ {
+		// ie. timestamp,keeper,...
+		parts := strings.Split(list[i], ",")
+		if keeper == parts[1] {
+			result++
+		}
+	}
+	return result
+}
+
+func getKeepersList(keeper string, list []string) []string {
+	result := []string{}
+	for i := 0; i < len(list); i++ {
+		// ie. timestamp,keeper,...
+		parts := strings.Split(list[i], ",")
+		if keeper == parts[1] {
+			result = append(result, list[i])
+		}
+	}
+	return result
+}
+
+func getKeepersListMany(keeperNames []string, list []string) []string {
+	result := []string{}
+	for i := 0; i < len(list); i++ {
+		// ie. timestamp,keeper,...
+		parts := strings.Split(list[i], ",")
+
+		for j := 0; j < len(keeperNames); j++ {
+			keeper := keeperNames[j]
+			if keeper == parts[1] || keeper == "*" {
+				result = append(result, list[i])
+			}
+		}
+	}
+	return result
+}
+
+func removeKeepersList(keeper string, list []string) []string {
+	result := []string{}
+	for i := 0; i < len(list); i++ {
+		// ie. timestamp,keeper,...
+		parts := strings.Split(list[i], ",")
+		if keeper != parts[1] {
+			result = append(result, list[i])
+		}
+	}
+	return result
+}
+
+func removeKeeper(keeper string, keepers []Keeper) []Keeper {
+	result := []Keeper{}
+	for i := 0; i < len(keepers); i++ {
+		if keeper != keepers[i].name {
+			result = append(result, keepers[i])
+		}
+	}
+	return result
+}
+
+const HTML_START string = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width", initial-scale=1.0"/>
+    <meta name="Description" content="ScoresTN2 Reflector">
+    <meta name="theme-color" content="#d36060"/>
+    <title>
+    ScoresTN2 Reflector
+    </title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon"
+      type="image/png" 
+      href="/favicon.ico" />
+  </head>
+  <body class="body">
+    <main>
+`
+
+const HTML_INTRO_KEEPERS string = `
+    <article class="page">
+      <h1  id="top">ScoresTN2 Reflector - Current Score Keepers</h1>
+
+      <div class="introduction">
+      <p>
+      Version 2.2
+      </p>
+      <p>
+      This is a list of the current score keepers.
+      </p>
+      </div>
+`
+
+const HTML_INTRO_SCORES string = `
+    <article class="page">
+      <h1  id="top">ScoresTN2 Reflector - Scores</h1>
+`
+
+const HTML_LAST string = `
+      <p>
+      (This list is generated from a tool that can be found
+      <a
+        href="https://github.com/alpiepho/scoreboard_reflector_tn2"
+        target="_blank"
+        rel="noreferrer"
+      >here</a>.)
+      </p>
+    <div id="bottom"></div>
+    </article>
+	</main>
+  </body>
+</html>
+`
+
+func buildKeepersHtml(keepers []Keeper) string {
+	//TODO: consider using template file and r.HTML
+	result := ""
+	result += HTML_START
+	result += HTML_INTRO_KEEPERS
+	result += "      <ul>\n"
+	for i := 0; i < len(keepers); i++ {
+		result += "        <li><a href=\"./" + keepers[i].name + "/html\">" + keepers[i].name + "</a>\n"
+		result += "        </li>\n"
+	}
+	result += "      </ul>\n"
+	result += HTML_LAST
+	return result
+}
+
+func buildKeeperScoresHtml(keeper string, list []string) string {
+	//TODO: consider using template file and r.HTML
+	result := ""
+	result += HTML_START
+	result += HTML_INTRO_SCORES
+
+	result += "      <div class=\"introduction\">\n"
+	result += "      <p>\n"
+	result += "      Scores for " + keeper + "\n"
+	result += "      </p>\n"
+	result += "      </div>\n"
+
+	result += "      <ul>\n"
+
+	for i := 0; i < len(list); i++ {
+		//fmt.Printf("%s\n", list[i])
+		result += "        <li>\n"
+		parts := strings.Split(list[i], ",")
+		// ie. timestamp,shannon,000000,ffffff,ffffff,000000,Them,Us,0,0, 10, 8,  0
+		//     0         1       2      3      4      5      6    7  8 9  10  11  12
+		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion
+		// 0    1      2       3       4       5       6     7     8     9     10     11     12
+		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion font zoom     sets5    setsShow
+		// 0    1      2       3       4       5       6     7     8     9     10     11     12        13   14       15       16
+		//                                                                                   1|2       str  zoomOn|  sets5|   setsShowOn|
+		//                                                                                                  zoomOff  sets3    setsShowOff
+		if len(parts) >= 13 {
+			result += parts[0] + ", "
+			if parts[12] == "1" {
+				result += "*"
+			}
+			result += parts[6] + ", "
+			if parts[12] == "2" {
+				result += "*"
+			}
+			result += parts[7] + ", "
+
+			result += parts[10] + ", "
+			result += parts[11] //+ ", "
+			// } else if len(parts) == 9 {
+			// 	// ie. timestamp,shannon,Them,Us,0,0,10, 8,0
+			// 	//     0         1       2    3  4 5 6   7 8
+			// 	result += parts[0] + ", "
+			// 	if parts[8] == "1" {
+			// 		result += "*"
+			// 	}
+			// 	result += parts[2] + ", "
+			// 	if parts[8] == "2" {
+			// 		result += "*"
+			// 	}
+			// 	result += parts[3] + ", "
+
+			// 	result += parts[6] + ", "
+			// 	result += parts[7] //+ ", "
+		} else {
+			result += list[i]
+		}
+		result += "        </li>\n"
+	}
+	result += "      </ul>\n"
+	result += HTML_LAST
+	return result
+}
+
 func main() {
 	VERSION := "2.2"
-	MAXLIST := 1000      // max size of list
-	MAXMINUTES := 60     // max minutes to keep data, per keeper
-	MAXMINUTESALL := 120 // max minutes to keep data, any keeper
-	list := []string{}   // list
+	MAXLIST := 1000            // max size of list
+	MAXMINUTES := (12 * 60)    // max minutes to keep data, per keeper
+	MAXMINUTESALL := (24 * 60) // max minutes to keep data, any keeper
+	list := []string{}         // list
 	keepers := []Keeper{}
 	lastAdd := 0 // count down from last add
 
@@ -327,205 +534,4 @@ func main() {
 	port = ":" + port
 
 	r.Run(port)
-}
-
-func getKeepersIndex(keeper string, keepers []Keeper) int {
-	index := -1
-	for i := 0; i < len(keepers); i++ {
-		if keeper == keepers[i].name {
-			index = i
-		}
-	}
-	return index
-}
-
-func getKeepersCount(keeper string, list []string) int {
-	result := 0
-	for i := 0; i < len(list); i++ {
-		// ie. timestamp,keeper,...
-		parts := strings.Split(list[i], ",")
-		if keeper == parts[1] {
-			result++
-		}
-	}
-	return result
-}
-
-func getKeepersList(keeper string, list []string) []string {
-	result := []string{}
-	for i := 0; i < len(list); i++ {
-		// ie. timestamp,keeper,...
-		parts := strings.Split(list[i], ",")
-		if keeper == parts[1] {
-			result = append(result, list[i])
-		}
-	}
-	return result
-}
-
-func getKeepersListMany(keeperNames []string, list []string) []string {
-	result := []string{}
-	for i := 0; i < len(list); i++ {
-		// ie. timestamp,keeper,...
-		parts := strings.Split(list[i], ",")
-
-		for j := 0; j < len(keeperNames); j++ {
-			keeper := keeperNames[j]
-			if keeper == parts[1] || keeper == "*" {
-				result = append(result, list[i])
-			}
-		}
-	}
-	return result
-}
-
-func removeKeepersList(keeper string, list []string) []string {
-	result := []string{}
-	for i := 0; i < len(list); i++ {
-		// ie. timestamp,keeper,...
-		parts := strings.Split(list[i], ",")
-		if keeper != parts[1] {
-			result = append(result, list[i])
-		}
-	}
-	return result
-}
-
-func removeKeeper(keeper string, keepers []Keeper) []Keeper {
-	result := []Keeper{}
-	for i := 0; i < len(keepers); i++ {
-		if keeper != keepers[i].name {
-			result = append(result, keepers[i])
-		}
-	}
-	return result
-}
-
-const HTML_START string = `
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width", initial-scale=1.0"/>
-    <meta name="Description" content="ScoresTN2 Reflector">
-    <meta name="theme-color" content="#d36060"/>
-    <title>
-    ScoresTN2 Reflector
-    </title>
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon"
-      type="image/png" 
-      href="/favicon.ico" />
-  </head>
-  <body class="body">
-    <main>
-`
-
-const HTML_INTRO_KEEPERS string = `
-    <article class="page">
-      <h1  id="top">ScoresTN2 Reflector - Current Score Keepers</h1>
-
-      <div class="introduction">
-      <p>
-      Version 2.2
-      </p>
-      <p>
-      This is a list of the current score keepers.
-      </p>
-      </div>
-`
-
-const HTML_INTRO_SCORES string = `
-    <article class="page">
-      <h1  id="top">ScoresTN2 Reflector - Scores</h1>
-`
-
-const HTML_LAST string = `
-      <p>
-      (This list is generated from a tool that can be found
-      <a
-        href="https://github.com/alpiepho/scoreboard_reflector_tn2"
-        target="_blank"
-        rel="noreferrer"
-      >here</a>.)
-      </p>
-    <div id="bottom"></div>
-    </article>
-	</main>
-  </body>
-</html>
-`
-
-func buildKeepersHtml(keepers []Keeper) string {
-	//TODO: consider using template file and r.HTML
-	result := ""
-	result += HTML_START
-	result += HTML_INTRO_KEEPERS
-	result += "      <ul>\n"
-	for i := 0; i < len(keepers); i++ {
-		result += "        <li><a href=\"./" + keepers[i].name + "/html\">" + keepers[i].name + "</a>\n"
-		result += "        </li>\n"
-	}
-	result += "      </ul>\n"
-	result += HTML_LAST
-	return result
-}
-
-func buildKeeperScoresHtml(keeper string, list []string) string {
-	//TODO: consider using template file and r.HTML
-	result := ""
-	result += HTML_START
-	result += HTML_INTRO_SCORES
-
-	result += "      <div class=\"introduction\">\n"
-	result += "      <p>\n"
-	result += "      Scores for " + keeper + "\n"
-	result += "      </p>\n"
-	result += "      </div>\n"
-
-	result += "      <ul>\n"
-
-	for i := 0; i < len(list); i++ {
-		//fmt.Printf("%s\n", list[i])
-		result += "        <li>\n"
-		parts := strings.Split(list[i], ",")
-		if len(parts) == 13 {
-			// ie. timestamp,shannon,000000,ffffff,ffffff,000000,Them,Us,0,0, 10, 8,  0
-			//     0         1       2      3      4      5      6    7  8 9  10  11  12
-			result += parts[0] + ", "
-			if parts[12] == "1" {
-				result += "*"
-			}
-			result += parts[6] + ", "
-			if parts[12] == "2" {
-				result += "*"
-			}
-			result += parts[7] + ", "
-
-			result += parts[10] + ", "
-			result += parts[11] //+ ", "
-		} else if len(parts) == 9 {
-			// ie. timestamp,shannon,Them,Us,0,0,10, 8,0
-			//     0         1       2    3  4 5 6   7 8
-			result += parts[0] + ", "
-			if parts[8] == "1" {
-				result += "*"
-			}
-			result += parts[2] + ", "
-			if parts[8] == "2" {
-				result += "*"
-			}
-			result += parts[3] + ", "
-
-			result += parts[6] + ", "
-			result += parts[7] //+ ", "
-		} else {
-			result += list[i]
-		}
-		result += "        </li>\n"
-	}
-	result += "      </ul>\n"
-	result += HTML_LAST
-	return result
 }
