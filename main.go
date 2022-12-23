@@ -78,15 +78,15 @@ func removeKeepersList(keeper string, list []string) []string {
 	return result
 }
 
-func removeKeeper(keeper string, keepers []Keeper) []Keeper {
-	result := []Keeper{}
-	for i := 0; i < len(keepers); i++ {
-		if keeper != keepers[i].name {
-			result = append(result, keepers[i])
-		}
-	}
-	return result
-}
+// func removeKeeper(keeper string, keepers []Keeper) []Keeper {
+// 	result := []Keeper{}
+// 	for i := 0; i < len(keepers); i++ {
+// 		if keeper != keepers[i].name {
+// 			result = append(result, keepers[i])
+// 		}
+// 	}
+// 	return result
+// }
 
 const HTML_START string = `
 <!DOCTYPE html>
@@ -214,7 +214,19 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 			// 	result += parts[6] + ", "
 			// 	result += parts[7] //+ ", "
 		} else {
-			result += list[i]
+			// format any links
+			line := list[i]
+			if strings.Contains(line, "https://") {
+				start := strings.Index(line, "https://")
+				end := strings.Index(line[start:], " ")
+				if end == -1 {
+					end = len(line)
+				}
+				url := line[start:end]
+				anchor := "<a href=\"" + url + "\" target=\"_blank\" rel=\"noreferrer\">" + url + "</a>"
+				line = strings.Replace(line, url, anchor, 1)
+			}
+			result += line
 		}
 		result += "        </li>\n"
 	}
