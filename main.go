@@ -237,17 +237,19 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 
 func main() {
 	VERSION := "2.2"
-	MAXLIST := 1000            // max size of list
+	MAXLIST := 1000 // max size of list
+	// MAXMINUTES := (10)    // max minutes to keep data, per keeper
+	// MAXMINUTESALL := (20) // max minutes to keep data, any keeper
 	MAXMINUTES := (12 * 60)    // max minutes to keep data, per keeper
 	MAXMINUTESALL := (24 * 60) // max minutes to keep data, any keeper
 	list := []string{}         // list
 	keepers := []Keeper{}
-	lastAdd := 0 // count down from last add
+	lastAdd := MAXMINUTESALL // count down from last add
 
 	s := gocron.NewScheduler(time.UTC)
 	// check every minute
 	s.Cron("*/1 * * * *").Do(func() {
-		//fmt.Printf("*/1 * * * *\n")
+		// fmt.Printf("*/1 * * * *\n")
 		// reset by keeper
 		for i := 0; i < len(keepers); i++ {
 			if keepers[i].lastAdd == 0 {
