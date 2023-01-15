@@ -1,4 +1,5 @@
 # scorebaord_reflector_tn2
+Version: 2.2g
 Simple Golang web site that caches or reflects score data from ScoresTN2 application
 
 
@@ -106,6 +107,10 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [x] ScoresTN2 - verify speed etc.
 - [x] try hosting
 - [x] start ScoresTapTN2
+- [ ] refactor lists
+- [ ] delete based on cron, say daily...relative hours is too complicated
+- [ ] build admin page
+- [ ] add logs
 
 - [ ] review use of gin?, seems to have pulled in many packages
 
