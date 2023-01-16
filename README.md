@@ -1,4 +1,5 @@
 # scorebaord_reflector_tn2
+Version: 2.2g
 Simple Golang web site that caches or reflects score data from ScoresTN2 application
 
 
@@ -106,8 +107,24 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [x] ScoresTN2 - verify speed etc.
 - [x] try hosting
 - [x] start ScoresTapTN2
+- [-] review use of gin?, seems to have pulled in many packages
+- [x] refactor lists
+- [x] delete based on cron, say daily...relative hours is too complicated
+- [x] build admin page
+- [x] add logs
+- [x] hook logs
+- [x] hook resets
+- [x] log control (on, off)
+- [x] all/merged (indent)
+- [x] all/merged (color)
+- [x] admin insert comments
+- [ ] clean up duplicate code in add
+- [ ] admin insert corrections
+- [ ] stress tests, lots, roller, fast?
+- [ ] for scores: copy keeper
+- [x] for tap: one keeper
 
-- [ ] review use of gin?, seems to have pulled in many packages
+
 
 ## HOW TO RUN LOCAL index.html (if needed)
 
@@ -253,4 +270,7 @@ The "scoreboard_" family of projects:
 - https://github.com/alpiepho/scoreboard_tap_tn2
 
 - https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
+
+- html/golang form
+- https://gist.github.com/SoftwareDevPro/b6d413fe1085e52accc72f3e67d41226
 
