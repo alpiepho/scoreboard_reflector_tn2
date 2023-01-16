@@ -14,16 +14,37 @@ import (
 var VERSION string = "2.2h"
 
 var MAXLIST int = 1000 // max size of list
-//DEBUG
-// var MAXLIST int = 10 // max size of list
+var MAXLOGS int = 1000 // max size of logs
 
 type Keeper struct {
 	name string
 }
 
-func getKeepersIndex(keeperName string, keepers *[]Keeper) int {
+var list = []string{}
+var keepers = []Keeper{}
+
+var logs = []string{}
+var logOn = false
+
+func logAdd(c *gin.Context, msg string) {
+	if logOn {
+		currentTime := time.Now()
+		ts := currentTime.Format("2006-01-02_15:04:05")
+
+		msg = ts + ": " + msg
+		if c != nil {
+			msg = ts + " (" + c.RemoteIP() + "): " + msg
+		}
+		if len(logs) >= MAXLOGS {
+			logs = logs[:len(logs)-1] // remove last
+		}
+		logs = append([]string{msg}, logs...) // add first
+	}
+}
+
+func getKeepersIndex(keeperName string) int {
 	index := -1
-	for i, keeper := range *keepers {
+	for i, keeper := range keepers {
 		if keeperName == keeper.name {
 			index = i
 		}
@@ -31,7 +52,7 @@ func getKeepersIndex(keeperName string, keepers *[]Keeper) int {
 	return index
 }
 
-func getKeepersCount(keeper string, list []string) int {
+func getKeepersCount(keeper string) int {
 	result := 0
 	for i := 0; i < len(list); i++ {
 		// ie. timestamp,keeper,...
@@ -43,19 +64,19 @@ func getKeepersCount(keeper string, list []string) int {
 	return result
 }
 
-func getKeepersList(keeper string, list []string) []string {
+func getKeepersList(keeper string) []string {
 	result := []string{}
 	for i := 0; i < len(list); i++ {
 		// ie. timestamp,keeper,...
 		parts := strings.Split(list[i], ",")
-		if keeper == parts[1] {
+		if keeper == "all" || keeper == "All" || keeper == parts[1] {
 			result = append(result, list[i])
 		}
 	}
 	return result
 }
 
-func getKeepersListMany(keeperNames []string, list []string) []string {
+func getKeepersListMany(keeperNames []string) []string {
 	result := []string{}
 	for i := 0; i < len(list); i++ {
 		// ie. timestamp,keeper,...
@@ -71,7 +92,7 @@ func getKeepersListMany(keeperNames []string, list []string) []string {
 	return result
 }
 
-func removeKeepersList(keeper string, list []string) []string {
+func removeKeepersList(keeper string) []string {
 	result := []string{}
 	for i := 0; i < len(list); i++ {
 		// ie. timestamp,keeper,...
@@ -83,7 +104,7 @@ func removeKeepersList(keeper string, list []string) []string {
 	return result
 }
 
-// func removeKeeper(keeper string, keepers []Keeper) []Keeper {
+// func removeKeeper(keeper string) []Keeper {
 // 	result := []Keeper{}
 // 	for i := 0; i < len(keepers); i++ {
 // 		if keeper != keepers[i].name {
@@ -163,23 +184,25 @@ const HTML_LAST string = `
 </html>
 `
 
-func buildKeepersHtml(keepers *[]Keeper) string {
-	//TODO: consider using template file and r.HTML
+func buildKeepersHtml() string {
+	//QUESTION: consider using template file and r.HTML
 	result := ""
 	result += HTML_START
 	result += strings.Replace(HTML_INTRO_KEEPERS, "VERSION", VERSION, 1)
 	result += "      <ul>\n"
-	for _, keeper := range *keepers {
-		result += "        <li><a href=\"./" + keeper.name + "/html\">" + keeper.name + "</a>\n"
-		result += "        </li>\n"
+	for _, keeper := range keepers {
+		result += "        <li><a href=\"./" + keeper.name + "/html\">" + keeper.name + "</a></li>\n"
 	}
+	result += "        <li><a href=\"./all/html\">All</a></li>\n"
 	result += "      </ul>\n"
 	result += HTML_LAST
 	return result
 }
 
-func buildKeeperScoresHtml(keeper string, list []string) string {
-	//TODO: consider using template file and r.HTML
+func buildKeeperScoresHtml(keeper string, keeperList []string) string {
+	all := (keeper == "all" || keeper == "All")
+
+	//QUESTION: consider using template file and r.HTML
 	result := ""
 	result += HTML_START
 	result += HTML_INTRO_SCORES
@@ -192,49 +215,61 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 
 	result += "      <ul>\n"
 
-	for i := 0; i < len(list); i++ {
-		//fmt.Printf("%s\n", list[i])
+	for i := 0; i < len(keeperList); i++ {
+		//fmt.Printf("%s\n", keeperList[i])
 		result += "        <li>\n"
-		parts := strings.Split(list[i], ",")
-		// ie. timestamp,shannon,000000,ffffff,ffffff,000000,Them,Us,0,0, 10, 8,  0
-		//     0         1       2      3      4      5      6    7  8 9  10  11  12
-		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion
-		// 0    1      2       3       4       5       6     7     8     9     10     11     12
+		parts := strings.Split(keeperList[i], ",")
 		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion font zoom     sets5    setsShow
 		// 0    1      2       3       4       5       6     7     8     9     10     11     12        13   14       15       16
 		//                                                                                   1|2       str  zoomOn|  sets5|   setsShowOn|
-		//                                                                                                  zoomOff  sets3    setsShowOff
+		//    	                                                                                              zoomOff  sets3    setsShowOff
+		if all {
+			index := getKeepersIndex(parts[1])
+			prefix := ""
+			for i := 0; i < index; i++ {
+				prefix += "&nbsp;&nbsp;"
+			}
+			result += prefix
+		}
 		if len(parts) >= 13 {
 			result += parts[0] + ", "
+			temp := ""
+			nameA := parts[6]
+			nameB := parts[7]
+			colorA1 := parts[2][2:]
+			colorA2 := parts[3][2:]
+			colorB1 := parts[4][2:]
+			colorB2 := parts[5][2:]
+			if all {
+				result += parts[1] + ", "
+			}
 			if parts[12] == "1" {
-				result += "*"
+				nameA = "*" + nameA
 			}
-			result += parts[6] + ", "
+			if all {
+				// color nameA
+				temp := fmt.Sprintf("<span style=\"color:#%v;background-color:#%v;\">%v</span>", colorA1, colorA2, nameA)
+				result += temp + ", "
+			} else {
+				result += nameA + ", "
+			}
+
 			if parts[12] == "2" {
-				result += "*"
+				nameB = "*" + nameB
 			}
-			result += parts[7] + ", "
+			if all {
+				// color nameB
+				temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v;\">%v</span>", colorB1, colorB2, nameB)
+				result += temp + ", "
+			} else {
+				result += nameB + ", "
+			}
 
 			result += parts[10] + ", "
 			result += parts[11] //+ ", "
-			// } else if len(parts) == 9 {
-			// 	// ie. timestamp,shannon,Them,Us,0,0,10, 8,0
-			// 	//     0         1       2    3  4 5 6   7 8
-			// 	result += parts[0] + ", "
-			// 	if parts[8] == "1" {
-			// 		result += "*"
-			// 	}
-			// 	result += parts[2] + ", "
-			// 	if parts[8] == "2" {
-			// 		result += "*"
-			// 	}
-			// 	result += parts[3] + ", "
-
-			// 	result += parts[6] + ", "
-			// 	result += parts[7] //+ ", "
 		} else {
 			// format any links
-			line := list[i]
+			line := keeperList[i]
 			if strings.Contains(line, "https://") {
 				start := strings.Index(line, "https://")
 				end := strings.Index(line[start:], " ")
@@ -254,59 +289,71 @@ func buildKeeperScoresHtml(keeper string, list []string) string {
 	return result
 }
 
-func buildAdminHtml(keepers *[]Keeper) string {
-	//TODO: consider using template file and r.HTML
+func buildAdminHtml() string {
+	//QUESTION: consider using template file and r.HTML
 	result := ""
 	result += HTML_START
 	result += strings.Replace(HTML_INTRO_ADMIN, "VERSION", VERSION, 1)
 	result += "      <ul>\n"
-	for _, keeper := range *keepers {
-		result += "        <li><a href=\"./" + keeper.name + "/html\">" + keeper.name + "</a>\n"
+	for _, keeper := range keepers {
+		result += "        <li>\n"
+		result += "          "
+		result += "[<a href=\"/___/___/" + keeper.name + "/raw\">raw</a>"
+		result += "&nbsp;&nbsp;"
+		result += "<a href=\"/___/___/" + keeper.name + "/reset\">reset</a>"
+		// result += "&nbsp;&nbsp;"
+		// result += "<a href=\"/" + keeper.name + "/html\">comment</a>" // TODO add comment/adjust page
+		result += "]&nbsp;&nbsp;&nbsp;&nbsp;"
+		result += "<a href=\"/" + keeper.name + "/html\">" + keeper.name + "</a>"
+		result += "\n"
 		result += "        </li>\n"
 	}
+	result += "      </ul>\n"
+	result += "      <br>\n"
+	result += "      <ul>\n"
+	result += "        <li><a href=\"/___/___/raw\">All Raw</a></li>\n"
+	result += "        <li><a href=\"/___/___/reset\">All Reset</a></li>\n"
+	result += "        <li><a href=\"/___/___/logs\">Logs</a></li>\n"
+	state := "OFF"
+	if logOn {
+		state = "ON"
+	}
+	result += "        <li><a href=\"/___/___/logs_toggle\">Logs Toggle: " + state + "</a></li>\n"
+	result += "        <li><a href=\"/___/___/logs_clear\">Logs Clear</a></li>\n"
+	result += "      </ul>\n"
+	result += HTML_LAST
+	return result
+}
+
+func buildAdminBackHtml() string {
+	//QUESTION: consider using template file and r.HTML
+	result := ""
+	result += HTML_START
+	result += strings.Replace(HTML_INTRO_ADMIN, "VERSION", VERSION, 1)
+	result += "      <ul>\n"
+	result += "        <li><a href=\"/___/___\">Back</a></li>\n"
 	result += "      </ul>\n"
 	result += HTML_LAST
 	return result
 }
 
 func main() {
-	list := []string{} // list
-	keepers := []Keeper{}
-	// lastAdd := MAXMINUTESALL // count down from last add
-
 	s := gocron.NewScheduler(time.UTC)
 	// every midgnight
 	s.Cron("0 0 * * *").Do(func() {
 		// fmt.Printf("0 0 * * *\n")
+		logAdd(nil, "cron: reset all")
 		list = []string{}
 		keepers = []Keeper{}
 	})
-	// // check every minute
-	// s.Cron("*/1 * * * *").Do(func() {
-	// 	// fmt.Printf("*/1 * * * *\n")
-	// 	// reset by keeper
-	// 	for i := 0; i < len(keepers); i++ {
-	// 		if keepers[i].lastAdd == 0 {
-	// 			fmt.Printf("timed reset for keeper " + keepers[i].name + "\n")
-	// 			list = removeKeepersList(keepers[i].name, list)
-	// 			keepers[i].lastAdd = -1
-	// 		}
-	// 		if keepers[i].lastAdd > 0 {
-	// 			keepers[i].lastAdd--
-	// 		}
-	// 	}
+	// every 5 minutes
+	s.Cron("*/5 * * * *").Do(func() {
+		// fmt.Printf("*/5 * * * *\n")
+		total := len(list)
+		msg := fmt.Sprintf("cron: stats: total=%v.", total)
+		logAdd(nil, msg)
+	})
 
-	// 	// global reset
-	// 	if lastAdd == 0 {
-	// 		fmt.Printf("timed reset all\n")
-	// 		list = []string{}
-	// 		keepers = []Keeper{}
-	// 		//lastAdd = -1
-	// 	}
-	// 	if lastAdd > 0 {
-	// 		lastAdd--
-	// 	}
-	// })
 	s.StartAsync()
 
 	r := gin.Default()
@@ -315,9 +362,18 @@ func main() {
 	r.StaticFile("/favicon.ico", "./resources/favicon.ico")
 	r.StaticFile("/style.css", "./resources/style.css")
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	// API - for Score and Tap Applications
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	// API
 	// route: /version
 	r.GET("/version", func(c *gin.Context) {
+		logAdd(c, "/version")
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, VERSION)
@@ -327,6 +383,7 @@ func main() {
 	// route: (url)/add?data=(data)
 	// add data to list
 	r.GET("/add", func(c *gin.Context) {
+		//logAdd(c, "/add")
 		data := c.DefaultQuery("data", "")
 		// limit size of list
 		if len(list) >= MAXLIST {
@@ -343,7 +400,7 @@ func main() {
 		// may have spaces declared as %20, looks like gin converts them to ' '
 
 		parts := strings.Split(data, ",")
-		keeperIndex := getKeepersIndex(parts[0], &keepers)
+		keeperIndex := getKeepersIndex(parts[0])
 		if keeperIndex == -1 {
 			keepers = append(keepers, Keeper{
 				name: parts[0],
@@ -358,12 +415,32 @@ func main() {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, "")
+
+		// Build log entry
+		//2023-01-15_11:19:15,dude,ff000000,fff44336,ff000000,ff448aff,Away,Home,0,0,23,14,2,FontTypes.system,zoomOff,sets3,setsShowOff
+		//                  0    1        2        3        4        5    6    7 8 9 10 11 12               13     14    15          16
+		parts = strings.Split(entry, ",")
+		//partial := string(entry)
+		partial := "/add: "
+		//partial += parts[0] + ","
+		partial += parts[1] + ","
+		partial += "..,"
+		partial += parts[6] + ","
+		partial += parts[7] + ","
+		partial += parts[8] + ","
+		partial += parts[9] + ","
+		partial += parts[10] + ","
+		partial += parts[11] + ","
+		partial += parts[12] + ","
+		partial += "..,"
+		logAdd(c, partial)
 	})
 
 	// API
 	// route: /json
 	// dump all list in raw form
 	r.GET("/json", func(c *gin.Context) {
+		logAdd(c, "/json")
 		offset := 0
 		count := len(list)
 		matchNames := []string{"*"}
@@ -389,7 +466,7 @@ func main() {
 			}
 		}
 
-		matchList := getKeepersListMany(matchNames, list)
+		matchList := getKeepersListMany(matchNames)
 		if count > len(matchList) {
 			count = len(matchList)
 		}
@@ -404,6 +481,7 @@ func main() {
 	// route: /keepers/json
 	// dump keeper names in json form
 	r.GET("/keepers/json", func(c *gin.Context) {
+		logAdd(c, "/keepers/json")
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		//DEBUG
@@ -420,7 +498,8 @@ func main() {
 	// json with all results for keeper
 	r.GET("/:keeperid/json", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
-		keeperList := getKeepersList(keeperid, list)
+		logAdd(c, "/"+keeperid+"/json")
+		keeperList := getKeepersList(keeperid)
 
 		offset := 0
 		count := len(keeperList)
@@ -444,34 +523,13 @@ func main() {
 		c.JSON(200, gin.H{keeperid: partialList})
 	})
 
-	// API - ADMIN - RESET ALL
-	// route: /reset
-	// reset list
-	r.GET("/___/reset", func(c *gin.Context) {
-		list = []string{}
-		keepers = []Keeper{}
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-		c.String(200, "")
-	})
-
-	// API - ADMIN - RESET KEEPER
-	// route: /(keeper)/reset
-	// reset keeper
-	r.GET("/:keeperid/reset", func(c *gin.Context) {
-		keeperid := c.Param("keeperid")
-		list = removeKeepersList(keeperid, list)
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-		c.String(200, "")
-	})
-
 	// API - COUNT
 	// route: /(keeper)/count
 	// raw with count of keeper results
 	r.GET("/:keeperid/count", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
-		count := getKeepersCount(keeperid, list)
+		logAdd(c, "/"+keeperid+"/json")
+		count := getKeepersCount(keeperid)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, string(rune(count)))
@@ -483,8 +541,9 @@ func main() {
 	r.GET("/:keeperid/:indexid/json", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
 		indexid := c.Param("indexid")
+		logAdd(c, "/"+keeperid+"/"+indexid+"/json")
 		index, _ := strconv.Atoi(indexid)
-		keeperList := getKeepersList(keeperid, list)
+		keeperList := getKeepersList(keeperid)
 		if index >= 0 && index < len(keeperList) {
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Methods", "GET")
@@ -497,11 +556,20 @@ func main() {
 		}
 	})
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	// WEB - routes for direct reflector HTML
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	// WEB
 	// route: /html
 	// html with list of keepers links
 	r.GET("/html", func(c *gin.Context) {
-		msg := buildKeepersHtml(&keepers)
+		logAdd(c, "/html")
+		msg := buildKeepersHtml()
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
@@ -511,20 +579,11 @@ func main() {
 	// route: /
 	// html with list of keepers links
 	r.GET("/", func(c *gin.Context) {
-		msg := buildKeepersHtml(&keepers)
+		logAdd(c, "/")
+		msg := buildKeepersHtml()
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
-	})
-
-	// WEB - HOME  DEBUG
-	// route: /raw
-	// dump all list in raw form
-	r.GET("/raw", func(c *gin.Context) {
-		msg := strings.Join(list, "\n")
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-		c.String(200, msg)
 	})
 
 	// WEB - KEEPER
@@ -532,7 +591,8 @@ func main() {
 	// html with results for keeper
 	r.GET("/:keeperid/html", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
-		keeperList := getKeepersList(keeperid, list)
+		logAdd(c, "/"+keeperid+"/html")
+		keeperList := getKeepersList(keeperid)
 		msg := buildKeeperScoresHtml(keeperid, keeperList)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
@@ -544,30 +604,111 @@ func main() {
 	// html with results for keeper
 	r.GET("/:keeperid", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
-		keeperList := getKeepersList(keeperid, list)
+		logAdd(c, "/"+keeperid)
+		keeperList := getKeepersList(keeperid)
 		msg := buildKeeperScoresHtml(keeperid, keeperList)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
-	// WEB - KEEPER DEBUG - RAW
-	// route: /(keeper)/raw
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	// WEB ADMIN - routes for direct reflector HTML (admin only)
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	// WEB - ADMIN
+	// route: /___/___   // HACK: should be protected, obscure url for now
+	// reset list
+	r.GET("/___/___", func(c *gin.Context) {
+		logAdd(c, "/___/___")
+		msg := buildAdminHtml()
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - ADMIN  RAW
+	// route: /___/___/raw
+	// dump all list in raw form
+	r.GET("/___/___/raw", func(c *gin.Context) {
+		logAdd(c, "/___/___/raw")
+		msg := strings.Join(list, "\n")
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.String(200, msg)
+	})
+
+	// WEB -ADMIN KEEPER RAW
+	// route: /___/___/(keeper)/raw
 	// all raw results for keeper
-	r.GET("/:keeperid/raw", func(c *gin.Context) {
+	r.GET("/___/___/:keeperid/raw", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
-		keeperList := getKeepersList(keeperid, list)
+		logAdd(c, "/___/___/"+keeperid+"/raw")
+		keeperList := getKeepersList(keeperid)
 		msg := strings.Join(keeperList, "\n")
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(200, msg)
 	})
 
-	// WEB - ADMIN
-	// route: /___/___   // HACK: should be protected, obscure url for now
+	// WEB - ADMIN - RESET ALL
+	// route: /___/___/reset
 	// reset list
-	r.GET("/___/___", func(c *gin.Context) {
-		msg := buildAdminHtml(&keepers)
+	r.GET("/___/___/reset", func(c *gin.Context) {
+		logAdd(c, "/___/___/reset")
+		list = []string{}
+		keepers = []Keeper{}
+		msg := buildAdminBackHtml()
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - ADMIN - RESET KEEPER
+	// route: /(keeper)/reset
+	// reset keeper
+	r.GET("/___/___/:keeperid/reset", func(c *gin.Context) {
+		keeperid := c.Param("keeperid")
+		logAdd(c, "/___/___/"+keeperid+"/reset")
+		list = removeKeepersList(keeperid)
+		msg := buildAdminBackHtml()
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - ADMIN - LOGS
+	// route: /___/___/logs
+	r.GET("/___/___/logs", func(c *gin.Context) {
+		//logAdd(c, "/___/___/logs")
+		msg := strings.Join(logs, "\n")
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.String(200, msg)
+	})
+
+	// WEB - ADMIN - LOGS TOGGLE
+	// route: /___/___/logs_toggle
+	r.GET("/___/___/logs_toggle", func(c *gin.Context) {
+		fmt.Println(logOn)
+		logOn = !logOn
+		//logAdd(c, "/___/___/logs_toggle")
+		msg := buildAdminBackHtml()
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - ADMIN - LOGS CLEAR
+	// route: /___/___/logs_clear
+	r.GET("/___/___/logs_clear", func(c *gin.Context) {
+		logs = []string{}
+		//logAdd(c, "/___/___/logs_clear")
+		msg := buildAdminBackHtml()
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))

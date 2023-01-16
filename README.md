@@ -107,12 +107,21 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [x] ScoresTN2 - verify speed etc.
 - [x] try hosting
 - [x] start ScoresTapTN2
-- [ ] refactor lists
-- [ ] delete based on cron, say daily...relative hours is too complicated
-- [ ] build admin page
-- [ ] add logs
+- [-] review use of gin?, seems to have pulled in many packages
+- [x] refactor lists
+- [x] delete based on cron, say daily...relative hours is too complicated
+- [x] build admin page
+- [x] add logs
+- [x] hook logs
+- [x] hook resets
+- [x] log control (on, off)
+- [x] all/merged (indent)
+- [x] all/merged (color)
+- [ ] admin insert comments and corrections
+- [ ] stress tests, lots, roller, fast?
+- [ ] for scores: add copy keeper
 
-- [ ] review use of gin?, seems to have pulled in many packages
+
 
 ## HOW TO RUN LOCAL index.html (if needed)
 
