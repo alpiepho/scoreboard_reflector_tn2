@@ -117,9 +117,12 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [x] log control (on, off)
 - [x] all/merged (indent)
 - [x] all/merged (color)
-- [ ] admin insert comments and corrections
+- [x] admin insert comments
+- [ ] clean up duplicate code in add
+- [ ] admin insert corrections
 - [ ] stress tests, lots, roller, fast?
-- [ ] for scores: add copy keeper
+- [ ] for scores: copy keeper
+- [x] for tap: one keeper
 
 
 
@@ -267,4 +270,7 @@ The "scoreboard_" family of projects:
 - https://github.com/alpiepho/scoreboard_tap_tn2
 
 - https://ramezanpour.net/post/2020/08/23/cors-support-go-gin
+
+- html/golang form
+- https://gist.github.com/SoftwareDevPro/b6d413fe1085e52accc72f3e67d41226
 

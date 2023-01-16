@@ -301,8 +301,8 @@ func buildAdminHtml() string {
 		result += "[<a href=\"/___/___/" + keeper.name + "/raw\">raw</a>"
 		result += "&nbsp;&nbsp;"
 		result += "<a href=\"/___/___/" + keeper.name + "/reset\">reset</a>"
-		// result += "&nbsp;&nbsp;"
-		// result += "<a href=\"/" + keeper.name + "/html\">comment</a>" // TODO add comment/adjust page
+		result += "&nbsp;&nbsp;"
+		result += "<a href=\"/___/___/" + keeper.name + "/comment\">comment</a>" // TODO add comment/adjust page
 		result += "]&nbsp;&nbsp;&nbsp;&nbsp;"
 		result += "<a href=\"/" + keeper.name + "/html\">" + keeper.name + "</a>"
 		result += "\n"
@@ -333,6 +333,22 @@ func buildAdminBackHtml() string {
 	result += "      <ul>\n"
 	result += "        <li><a href=\"/___/___\">Back</a></li>\n"
 	result += "      </ul>\n"
+	result += HTML_LAST
+	return result
+}
+
+func buildAdminCommentHtml(keeper string) string {
+	//QUESTION: consider using template file and r.HTML
+	result := ""
+	result += HTML_START
+	result += strings.Replace(HTML_INTRO_ADMIN, "VERSION", VERSION, 1)
+
+	result += "<form method=\"POST\" action=\"/___/___/content\">\n"
+	result += "    <label>Comment: </label><input name=\"comment\" type=\"text\" value=\"" + keeper + ": (from admin) \" />\n"
+	result += "&nbsp;&nbsp;"
+	result += "    <input type=\"submit\" value=\"Save\" />\n"
+	result += "</form>\n"
+	result += "<a href=\"/___/___\">Back</a></li>\n"
 	result += HTML_LAST
 	return result
 }
@@ -681,6 +697,18 @@ func main() {
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
 	})
 
+	// WEB - ADMIN - RESET KEEPER
+	// route: /(keeper)/comment
+	// reset keeper
+	r.GET("/___/___/:keeperid/comment", func(c *gin.Context) {
+		keeperid := c.Param("keeperid")
+		logAdd(c, "/___/___/"+keeperid+"/comment")
+		msg := buildAdminCommentHtml(keeperid)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
 	// WEB - ADMIN - LOGS
 	// route: /___/___/logs
 	r.GET("/___/___/logs", func(c *gin.Context) {
@@ -708,6 +736,42 @@ func main() {
 	r.GET("/___/___/logs_clear", func(c *gin.Context) {
 		logs = []string{}
 		//logAdd(c, "/___/___/logs_clear")
+		msg := buildAdminBackHtml()
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - ADMIN - LOGS CLEAR
+	// route: /___/___/logs_clear
+	r.POST("/___/___/content", func(c *gin.Context) {
+		logAdd(c, "/___/___/content")
+		c.Request.ParseForm()
+		comment := c.Request.FormValue("comment")
+		fmt.Println(comment)
+
+		// limit size of list
+		if len(list) >= MAXLIST {
+			// list = list[1:] // remove first
+			list = list[:len(list)-1] // remove last
+		}
+		// split keeper and comment
+		parts := strings.Split(comment, ":")
+		keeperIndex := getKeepersIndex(parts[0])
+		if keeperIndex == -1 {
+			keepers = append(keepers, Keeper{
+				name: parts[0],
+			})
+		}
+		// reassemble comment
+		comment = parts[0] + ", " + strings.TrimSpace(parts[1])
+
+		// prefix time stamp
+		currentTime := time.Now()
+		entry := currentTime.Format("2006-01-02_15:04:05") + "," + comment
+		//list = append(list, entry)              // add last
+		list = append([]string{entry}, list...) // add first
+
 		msg := buildAdminBackHtml()
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
