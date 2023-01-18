@@ -355,8 +355,8 @@ func buildAdminCommentHtml(keeper string) string {
 
 func main() {
 	s := gocron.NewScheduler(time.UTC)
-	// every midgnight
-	s.Cron("0 0 * * *").Do(func() {
+	// every midgnight adjusted to MST (server is UTC)
+	s.Cron("0 7 * * *").Do(func() {
 		// fmt.Printf("0 0 * * *\n")
 		logAdd(nil, "cron: reset all")
 		list = []string{}
