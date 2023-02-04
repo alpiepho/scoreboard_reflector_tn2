@@ -11,7 +11,7 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
-var VERSION string = "2.2h"
+var VERSION string = "2.2i"
 
 var MAXLIST int = 1000 // max size of list
 var MAXLOGS int = 1000 // max size of logs
@@ -184,6 +184,37 @@ const HTML_LAST string = `
 </html>
 `
 
+const HTML_START_LATEST string = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width", initial-scale=1.0"/>
+    <meta name="Description" content="ScoresTN2 Reflector">
+    <meta name="theme-color" content="#d36060"/>
+    <title>
+    ScoresTN2 Reflector
+    </title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon"
+      type="image/png" 
+      href="/favicon.ico" />
+	<script>
+	// setTimeout(function(){
+	// 	window.location.reload(1);
+	// }, 5000);
+	</script>
+  </head>
+  <body class="body-latest">
+    <main>
+`
+const HTML_LAST_LATEST string = `
+	</main>
+  </body>
+</html>
+`
+
 func buildKeepersHtml() string {
 	//QUESTION: consider using template file and r.HTML
 	result := ""
@@ -286,6 +317,72 @@ func buildKeeperScoresHtml(keeper string, keeperList []string) string {
 	}
 	result += "      </ul>\n"
 	result += HTML_LAST
+	return result
+}
+
+func buildKeeperLatestScoreHtml(keeper string, keeperList []string) string {
+
+	//QUESTION: consider using template file and r.HTML
+	result := ""
+	result += HTML_START_LATEST
+
+	if len(keeperList) == 0 {
+		result += "no score"
+	}
+	if len(keeperList) > 0 {
+		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion font zoom     sets5    setsShow
+		// 0    1      2       3       4       5       6     7     8     9     10     11     12        13   14       15       16
+		//                                                                                   1|2       str  zoomOn|  sets5|   setsShowOn|
+		//    	                                                                                              zoomOff  sets3    setsShowOff
+		parts := strings.Split(keeperList[0], ",")
+		if len(parts) >= 13 {
+			// result += parts[0] + ", "
+			temp := ""
+			nameA := parts[6]
+			nameB := parts[7]
+			colorA1 := parts[2][2:]
+			colorA2 := parts[3][2:]
+			colorB1 := parts[4][2:]
+			colorB2 := parts[5][2:]
+			scoreA := parts[10]
+			scoreB := parts[11]
+
+			result += "<div>\n"
+			if parts[12] == "1" {
+				nameA = "*" + nameA
+			}
+			// color nameA
+			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">%v</span>", colorA1, colorA2, nameA)
+			result += temp
+			// color scoreA
+			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">&nbsp;&nbsp;%v</span>", colorA1, colorA2, scoreA)
+			result += temp
+			result += "</div>\n"
+
+			result += "<div>\n"
+			if parts[12] == "2" {
+				nameB = "*" + nameB
+			}
+			// color nameB
+			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">%v</span>", colorB1, colorB2, nameB)
+			result += temp
+			// color scoreB
+			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">&nbsp;&nbsp;%v</span>", colorB1, colorB2, scoreB)
+			result += temp
+			result += "</div>\n"
+
+			// result += parts[10] + ", "
+			// result += parts[11] //+ ", "
+		}
+	}
+
+	// result += "      <div class=\"introduction\">\n"
+	// result += "      <p id=\"keeper\">\n"
+	// result += "      (" + keeper + ")\n"
+	// result += "      </p>\n"
+	// result += "      </div>\n"
+
+	result += HTML_LAST_LATEST
 	return result
 }
 
@@ -623,6 +720,32 @@ func main() {
 		logAdd(c, "/"+keeperid)
 		keeperList := getKeepersList(keeperid)
 		msg := buildKeeperScoresHtml(keeperid, keeperList)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - KEEPER
+	// route: /(keeper)/latest/html
+	// html with results for keeper
+	r.GET("/:keeperid/latest/html", func(c *gin.Context) {
+		keeperid := c.Param("keeperid")
+		logAdd(c, "/"+keeperid+"/latest/html")
+		keeperList := getKeepersList(keeperid)
+		msg := buildKeeperLatestScoreHtml(keeperid, keeperList)
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+		c.Data(200, "text/html; charset=utf-8", []byte(msg))
+	})
+
+	// WEB - KEEPER
+	// route: /(keeper)/latest
+	// html with results for keeper
+	r.GET("/:keeperid/latest", func(c *gin.Context) {
+		keeperid := c.Param("keeperid")
+		logAdd(c, "/"+keeperid+"/latest")
+		keeperList := getKeepersList(keeperid)
+		msg := buildKeeperLatestScoreHtml(keeperid, keeperList)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))

@@ -93,3 +93,11 @@ img {
     }
     
 }
+
+.body-latest {
+    margin: 0;
+    width: 800px;
+    font-family: Helvetica, Arial, sans-serif;
+    line-height: 140%;
+}
+

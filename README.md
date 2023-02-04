@@ -123,6 +123,7 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [ ] stress tests, lots, roller, fast?
 - [ ] for scores: copy keeper
 - [x] for tap: one keeper
+- [ ] add html for latest score of a keeper
 
 
 
