@@ -58,6 +58,14 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - data added with scorer id
 - timestamp added to data packet as received
 
+## SPECIAL ENDPOINTS
+
+There are a couple special endpoints:
+
+- https://refelectortn2.uw.r.appspot.com/html -  home page to get to raw list of keepers and scores
+
+- https://refelectortn2.uw.r.appspot.com/keeper/latest?rate=5 - example to get simple page that updates the score (with colors every 5 seconds)
+
 ## IDEAS ON HOSTING AND CONTROLLING COST
 
 - Build Go app within Docker
@@ -123,7 +131,7 @@ father-in-law said when his daughter told him we were getting married.  "You are
 - [ ] stress tests, lots, roller, fast?
 - [ ] for scores: copy keeper
 - [x] for tap: one keeper
-- [ ] add html for latest score of a keeper
+- [x] add html for latest score of a keeper
 
 
 

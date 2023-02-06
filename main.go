@@ -201,9 +201,9 @@ const HTML_START_LATEST string = `
       type="image/png" 
       href="/favicon.ico" />
 	<script>
-	// setTimeout(function(){
-	// 	window.location.reload(1);
-	// }, 5000);
+	setTimeout(function(){
+		window.location.reload(1);
+	}, 10000);
 	</script>
   </head>
   <body class="body-latest">
@@ -320,14 +320,27 @@ func buildKeeperScoresHtml(keeper string, keeperList []string) string {
 	return result
 }
 
-func buildKeeperLatestScoreHtml(keeper string, keeperList []string) string {
+func buildKeeperLatestScoreHtml(keeper string, rateStr string, keeperList []string) string {
 
 	//QUESTION: consider using template file and r.HTML
 	result := ""
 	result += HTML_START_LATEST
 
+	if len(rateStr) > 0 {
+		rateStr := fmt.Sprintf("%v000)", rateStr)
+		result = strings.Replace(result, "10000)", rateStr, 1)
+	}
+
+	//DEBUG
+	// sample := "2023-02-04_20:02:49,al,ff000000,fff44336,ff000000,ff448aff,Away,Home,0,0,1,0,1,FontTypes.system,zoomOff,sets3,setsShowOff"
+	// keeperList = append(keeperList, sample)
+
 	if len(keeperList) == 0 {
+		result += "<div id=\"scores\">\n"
+		result += "<div id=\"nameA\">\n"
 		result += "no score"
+		result += "</div>\n"
+		result += "</div>\n"
 	}
 	if len(keeperList) > 0 {
 		// time keeper colorA1 colorA2 colorB1 colorB2 nameA nameB setsA setsB scoreA scoreB possesion font zoom     sets5    setsShow
@@ -347,28 +360,32 @@ func buildKeeperLatestScoreHtml(keeper string, keeperList []string) string {
 			scoreA := parts[10]
 			scoreB := parts[11]
 
-			result += "<div>\n"
+			result += "<div id=\"scores\">\n"
+			result += "<div id=\"lineA\">\n"
 			if parts[12] == "1" {
 				nameA = "*" + nameA
 			}
 			// color nameA
-			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">%v</span>", colorA1, colorA2, nameA)
+			temp = fmt.Sprintf("<div id=\"nameA\" style=\"color:#%v;background-color:#%v;\">%v</div>", colorA1, colorA2, nameA)
 			result += temp
 			// color scoreA
-			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">&nbsp;&nbsp;%v</span>", colorA1, colorA2, scoreA)
+			temp = fmt.Sprintf("<div id=\"scoreA\" style=\"color:#%v;background-color:#%v;\">&nbsp;&nbsp;%v</div>", colorA1, colorA2, scoreA)
 			result += temp
 			result += "</div>\n"
+			result += "<div>\n"
 
 			result += "<div>\n"
+			result += "<div id=\"lineB\">\n"
 			if parts[12] == "2" {
 				nameB = "*" + nameB
 			}
 			// color nameB
-			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">%v</span>", colorB1, colorB2, nameB)
+			temp = fmt.Sprintf("<div id=\"nameB\"  style=\"color:#%v;background-color:#%v;\">%v</div>", colorB1, colorB2, nameB)
 			result += temp
 			// color scoreB
-			temp = fmt.Sprintf("<span style=\"color:#%v;background-color:#%v; width: 30px\">&nbsp;&nbsp;%v</span>", colorB1, colorB2, scoreB)
+			temp = fmt.Sprintf("<div id=\"scoreB\"  style=\"color:#%v;background-color:#%v;\">&nbsp;&nbsp;%v</div>", colorB1, colorB2, scoreB)
 			result += temp
+			result += "<div>\n"
 			result += "</div>\n"
 
 			// result += parts[10] + ", "
@@ -730,9 +747,10 @@ func main() {
 	// html with results for keeper
 	r.GET("/:keeperid/latest/html", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
+		rateStr := c.Query("rate")
 		logAdd(c, "/"+keeperid+"/latest/html")
 		keeperList := getKeepersList(keeperid)
-		msg := buildKeeperLatestScoreHtml(keeperid, keeperList)
+		msg := buildKeeperLatestScoreHtml(keeperid, rateStr, keeperList)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
@@ -743,9 +761,10 @@ func main() {
 	// html with results for keeper
 	r.GET("/:keeperid/latest", func(c *gin.Context) {
 		keeperid := c.Param("keeperid")
+		rateStr := c.Query("rate")
 		logAdd(c, "/"+keeperid+"/latest")
 		keeperList := getKeepersList(keeperid)
-		msg := buildKeeperLatestScoreHtml(keeperid, keeperList)
+		msg := buildKeeperLatestScoreHtml(keeperid, rateStr, keeperList)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET")
 		c.Data(200, "text/html; charset=utf-8", []byte(msg))
