@@ -2,6 +2,8 @@
 Version: 2.2g
 Simple Golang web site that caches or reflects score data from ScoresTN2 application
 
+WARNING: this server app was disabled as of 1/14/2024.  The code should be usable if re-deployed.
+
 
 ## SYSTEM OVERVIEW
 
